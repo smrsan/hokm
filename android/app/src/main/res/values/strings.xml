@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">cards</string>
+    <string name="title_activity_main">cards</string>
+    <string name="package_name">com.li1games.cards</string>
+    <string name="custom_url_scheme">com.li1games.cards</string>
+</resources>
