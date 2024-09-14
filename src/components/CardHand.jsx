@@ -1,8 +1,11 @@
 import { Box } from "@mui/material";
 import PlayingCard from "./PlayingCard/PlayingCard";
 import { playingCardClasses } from "./PlayingCard/styles";
+import { useRef, useState } from "react";
 
 const CARD_WIDTH = 100;
+const CARD_ROTATE_ANGLE = 90;
+const CARD_ROTATE_DIFF = 35;
 
 /** @type {(cardNum: number) => import("@mui/material").BoxProps["sx"]} */
 const makeRootSx = ({ position }) => {
@@ -37,18 +40,25 @@ const makeRootSx = ({ position }) => {
 };
 
 /** @type {(cardNum: number) => import("@mui/material").BoxProps["sx"]} */
-const makeCardSx = ({ index, totalCards, fanAngle, position, isOpponent }) => {
+const makeCardSx = ({
+    index,
+    totalCards,
+    fanAngle,
+    position,
+    isOpponent,
+    isDrawn,
+}) => {
     const angle =
         (index - (totalCards - 1) / 2) * (fanAngle / totalCards) -
         (position === "bottom"
-            ? 15
+            ? CARD_ROTATE_DIFF
             : position === "top"
-            ? 15 + 180
+            ? CARD_ROTATE_DIFF + CARD_ROTATE_ANGLE * 2
             : position === "right"
-            ? 90 + 15
+            ? CARD_ROTATE_ANGLE + CARD_ROTATE_DIFF
             : position === "left"
-            ? -90 + 15
-            : 15);
+            ? -CARD_ROTATE_ANGLE + CARD_ROTATE_DIFF
+            : CARD_ROTATE_DIFF);
 
     return {
         [`&.${playingCardClasses.root}`]: {
@@ -58,7 +68,7 @@ const makeCardSx = ({ index, totalCards, fanAngle, position, isOpponent }) => {
             transformOrigin: "bottom left",
             cursor: isOpponent ? "default" : "pointer",
             transitionDuration: "300ms",
-            transitionProperty: "transform",
+            transitionProperty: "all",
             transitionTimingFunction: "ease",
             ...(isOpponent
                 ? {}
@@ -70,6 +80,14 @@ const makeCardSx = ({ index, totalCards, fanAngle, position, isOpponent }) => {
                 `,
                       },
                   }),
+            ...(isDrawn
+                ? {
+                      zIndex: isDrawn,
+                      transform: `rotate(0deg) scale(.9)`,
+                      translate: "-50% -150%",
+                      "&:hover": {},
+                  }
+                : {}),
         },
         [`& .${playingCardClasses.img}`]: {
             position: "relative",
@@ -83,11 +101,20 @@ const CardHand = ({ position = "right", isOpponent = false }) => {
     const totalCards = 13;
     const fanAngle = 135;
 
+    const highestZIndexRef = useRef(0);
+    const [isDrawn, setisDrawn] = useState({});
+
     return (
         <Box sx={makeRootSx({ position })}>
             {Array.from({ length: 13 }).map((_, i) => (
                 <PlayingCard
                     key={i}
+                    onClick={() =>
+                        setisDrawn((p) => ({
+                            ...p,
+                            [i]: p[i] ? false : ++highestZIndexRef.current,
+                        }))
+                    }
                     {...{
                         sx: makeCardSx({
                             index: i,
@@ -95,6 +122,7 @@ const CardHand = ({ position = "right", isOpponent = false }) => {
                             fanAngle,
                             position,
                             isOpponent,
+                            isDrawn: isDrawn[i],
                         }),
                         cardNum: isOpponent ? -1 : i + 1,
                     }}
