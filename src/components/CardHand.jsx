@@ -37,7 +37,7 @@ const makeRootSx = ({ position }) => {
 };
 
 /** @type {(cardNum: number) => import("@mui/material").BoxProps["sx"]} */
-const makeCardSx = ({ index, totalCards, fanAngle, position }) => {
+const makeCardSx = ({ index, totalCards, fanAngle, position, isOpponent }) => {
     const angle =
         (index - (totalCards - 1) / 2) * (fanAngle / totalCards) -
         (position === "bottom"
@@ -56,16 +56,20 @@ const makeCardSx = ({ index, totalCards, fanAngle, position }) => {
             width: `${CARD_WIDTH}px`,
             transform: `rotate(${angle}deg)`,
             transformOrigin: "bottom left",
-            cursor: "pointer",
+            cursor: isOpponent ? "default" : "pointer",
             transitionDuration: "300ms",
             transitionProperty: "transform",
             transitionTimingFunction: "ease",
-            "&:hover": {
-                transform: `
+            ...(isOpponent
+                ? {}
+                : {
+                      "&:hover": {
+                          transform: `
                     rotate(${angle}deg)
                     translateY(-15%)
                 `,
-            },
+                      },
+                  }),
         },
         [`& .${playingCardClasses.img}`]: {
             position: "relative",
@@ -90,6 +94,7 @@ const CardHand = ({ position = "right", isOpponent = false }) => {
                             totalCards,
                             fanAngle,
                             position,
+                            isOpponent,
                         }),
                         cardNum: isOpponent ? -1 : i + 1,
                     }}
