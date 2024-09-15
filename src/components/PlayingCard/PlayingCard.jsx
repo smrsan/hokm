@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { forwardRef, useRef, useState } from "react";
 import { Box } from "@mui/material";
 import { playingCardClasses, playingCardRootSx } from "./styles";
 import clsx from "clsx";
@@ -14,7 +14,10 @@ import clsx from "clsx";
  * @param {import("@mui/material").BoxProps & PlayingCardProps} props
  * @returns {JSXElement}
  */
-const PlayingCard = ({ cardNum = 0, ...props }) => {
+const PlayingCard = forwardRef(function PlayingCard(
+    { cardNum = 0, ...props },
+    ref
+) {
     /** @type {import("react").MutableRefObject<HTMLImageElement>} */
     const imgRef = useRef();
     const [isLoaded, setIsLoaded] = useState(false);
@@ -33,6 +36,7 @@ const PlayingCard = ({ cardNum = 0, ...props }) => {
     return (
         <Box
             {...props}
+            ref={ref}
             sx={{
                 ...playingCardRootSx,
                 ...props.sx,
@@ -56,6 +60,6 @@ const PlayingCard = ({ cardNum = 0, ...props }) => {
             />
         </Box>
     );
-};
+});
 
 export default PlayingCard;
