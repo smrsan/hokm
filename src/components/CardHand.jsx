@@ -9,6 +9,7 @@ import clsx from "clsx";
 
 const CARD_WIDTH = 100;
 const CARD_ROTATE_ANGLE = 90;
+const CARDS_FAN_ANGLE = 135;
 
 const classes = makeClassNames("CardHand", [
     "pos-top",
@@ -93,34 +94,12 @@ const CardHand = ({
     isOpponent = false,
     initCards = _initCards,
 }) => {
-    const fanAngle = 135;
-
     const highestZIndexRef = useRef(0);
     const [cards, setCards, cardsRef] = useStateRef({});
-    const [, setInHandCards, inHandCardsRef] = useStateRef(initCards.length);
+    const [inHandCards, setInHandCards] = useStateRef(initCards.length);
     const cardRefs = useRef({});
     const copiedCardRefs = useRef({});
     const isMountedRef = useIsMounted();
-
-    const makeAngle = useCallback(
-        ({ index: cardIndex }) => {
-            const inHandCards = inHandCardsRef.current;
-            const angleDiff = inHandCards * 3;
-            return (
-                (cardIndex - (inHandCards - 1) / 2) * (fanAngle / inHandCards) -
-                (position === "bottom"
-                    ? angleDiff
-                    : position === "top"
-                    ? angleDiff + CARD_ROTATE_ANGLE * 2
-                    : position === "right"
-                    ? CARD_ROTATE_ANGLE + angleDiff
-                    : position === "left"
-                    ? -CARD_ROTATE_ANGLE + angleDiff
-                    : angleDiff)
-            );
-        },
-        [inHandCardsRef, position]
-    );
 
     const setCardFixed = useCallback((card) => {
         /** @type {HTMLDivElement} */
@@ -211,7 +190,11 @@ const CardHand = ({
                             cardNum={isOpponent ? -1 : cardNum}
                             sx={makeCardSx({
                                 drawnZIndex: +card.isDrawn && card.drawnIndex,
-                                angle: makeAngle({ index: card.index }),
+                                angle: makeAngle({
+                                    position,
+                                    index: card.index,
+                                    inHandCards,
+                                }),
                             })}
                             className={clsx({
                                 [classes["back-card"]]: isOpponent,
@@ -231,7 +214,11 @@ const CardHand = ({
                         cardNum={isOpponent ? -1 : cardNum}
                         sx={makeCardSx({
                             drawnZIndex: +card.isDrawn && card.drawnIndex,
-                            angle: makeAngle({ index: card.index }),
+                            angle: makeAngle({
+                                position,
+                                index: card.index,
+                                inHandCards,
+                            }),
                         })}
                         className={clsx({
                             [classes["copy-card"]]: true,
@@ -246,3 +233,19 @@ const CardHand = ({
 };
 
 export default CardHand;
+
+const makeAngle = ({ index: cardIndex, position, inHandCards }) => {
+    const angleDiff = inHandCards * 3;
+    return (
+        (cardIndex - (inHandCards - 1) / 2) * (CARDS_FAN_ANGLE / inHandCards) -
+        (position === "bottom"
+            ? angleDiff
+            : position === "top"
+            ? angleDiff + CARD_ROTATE_ANGLE * 2
+            : position === "right"
+            ? CARD_ROTATE_ANGLE + angleDiff
+            : position === "left"
+            ? -CARD_ROTATE_ANGLE + angleDiff
+            : angleDiff)
+    );
+};
