@@ -4,40 +4,40 @@ import { playingCardClasses } from "./PlayingCard/styles";
 import { createRef, useCallback, useEffect, useRef, useState } from "react";
 import useStateRef from "../hooks/useStateRef";
 import useIsMounted from "../hooks/useIsMounted";
+import makeClassNames from "../utils/makeClassNames";
+import clsx from "clsx";
 
 const CARD_WIDTH = 100;
 const CARD_ROTATE_ANGLE = 90;
 
-/** @type {(cardNum: number) => import("@mui/material").BoxProps["sx"]} */
-const makeRootSx = ({ position }) => {
-    return {
-        position: "fixed",
-        placeItems: "center",
-        ...(position === "top"
-            ? {
-                  top: -CARD_WIDTH * 2.1,
-                  right: "50%",
-              }
-            : position === "bottom"
-            ? {
-                  bottom: CARD_WIDTH * 2 + 10,
-                  left: "50%",
-              }
-            : position === "right"
-            ? {
-                  bottom: `calc(50% + ${CARD_WIDTH}px)`,
-                  right: -CARD_WIDTH * 0.6,
-              }
-            : position === "left"
-            ? {
-                  bottom: `calc(50% + ${CARD_WIDTH * 2}px)`,
-                  left: -CARD_WIDTH * 0.6,
-              }
-            : {
-                  top: -CARD_WIDTH + 10,
-                  right: "50%",
-              }),
-    };
+const classes = makeClassNames("CardHand", [
+    "pos-top",
+    "pos-left",
+    "pos-right",
+    "pos-bottom",
+]);
+
+/** @type {import("@mui/material").BoxProps["sx"]} */
+const rootSx = {
+    position: "fixed",
+    placeItems: "center",
+
+    [`&.${classes["pos-top"]}`]: {
+        top: -CARD_WIDTH * 2.1,
+        right: "50%",
+    },
+    [`&.${classes["pos-bottom"]}`]: {
+        bottom: CARD_WIDTH * 2 + 10,
+        left: "50%",
+    },
+    [`&.${classes["pos-right"]}`]: {
+        bottom: `calc(50% + ${CARD_WIDTH}px)`,
+        right: -CARD_WIDTH * 0.6,
+    },
+    [`&.${classes["pos-left"]}`]: {
+        bottom: `calc(50% + ${CARD_WIDTH * 2}px)`,
+        left: -CARD_WIDTH * 0.6,
+    },
 };
 
 /** @type {(cardNum: number) => import("@mui/material").BoxProps["sx"]} */
@@ -197,7 +197,7 @@ const CardHand = ({
 
     return (
         <>
-            <Box sx={makeRootSx({ position })}>
+            <Box sx={rootSx} className={clsx(classes[`pos-${position}`])}>
                 {Object.entries(cards)
                     .sort(([, a], [, b]) => a.index - b.index)
                     .map(([cardNum, card]) => (
