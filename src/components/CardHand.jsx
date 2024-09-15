@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import PlayingCard from "./PlayingCard/PlayingCard";
 import { playingCardClasses } from "./PlayingCard/styles";
-import { createRef, useCallback, useEffect, useRef, useState } from "react";
+import { createRef, useCallback, useEffect, useRef } from "react";
 import useStateRef from "../hooks/useStateRef";
 import useIsMounted from "../hooks/useIsMounted";
 import makeClassNames from "../utils/makeClassNames";
@@ -15,6 +15,10 @@ const classes = makeClassNames("CardHand", [
     "pos-left",
     "pos-right",
     "pos-bottom",
+
+    "copy-card",
+    "back-card",
+    "drawn-card",
 ]);
 
 /** @type {import("@mui/material").BoxProps["sx"]} */
@@ -40,71 +44,47 @@ const rootSx = {
     },
 };
 
-/** @type {(cardNum: number) => import("@mui/material").BoxProps["sx"]} */
-const makeCardSx = ({
-    index,
-    totalCards,
-    fanAngle,
-    position,
-    isOpponent,
-    isDrawn,
-    isCopyCard,
-}) => {
-    const angleDiff = totalCards * 3;
-    const angle =
-        (index - (totalCards - 1) / 2) * (fanAngle / totalCards) -
-        (position === "bottom"
-            ? angleDiff
-            : position === "top"
-            ? angleDiff + CARD_ROTATE_ANGLE * 2
-            : position === "right"
-            ? CARD_ROTATE_ANGLE + angleDiff
-            : position === "left"
-            ? -CARD_ROTATE_ANGLE + angleDiff
-            : angleDiff);
+/** @type {(props: Object) => import("@mui/material").BoxProps["sx"]} */
+const makeCardSx = ({ drawnZIndex, angle }) => ({
+    [`&.${classes["copy-card"]}`]: {
+        opacity: 0,
+        pointerEvents: "none",
+    },
 
-    return {
-        [`&.${playingCardClasses.root}`]: {
-            ...(isCopyCard
-                ? {
-                      opacity: 0,
-                      pointerEvents: "none",
-                  }
-                : {
-                      position: "absolute",
-                  }),
-            width: `${CARD_WIDTH}px`,
-            transform: `rotate(${angle}deg)`,
-            transformOrigin: "bottom left",
-            cursor: isOpponent ? "default" : "pointer",
-            transitionDuration: "300ms",
-            transitionProperty: "all",
-            transitionTimingFunction: "ease",
-            ...(isOpponent
-                ? {}
-                : {
-                      "&:hover": {
-                          transform: `
-                            rotate(${angle}deg)
-                            translateY(-15%)
-                        `,
-                      },
-                  }),
-            ...(isDrawn
-                ? {
-                      zIndex: isDrawn,
-                      transform: `rotate(0deg) scale(.9) translate(-50%, -150%)`,
-                      "&:hover": {},
-                  }
-                : {}),
+    [`&.${classes["back-card"]}`]: {
+        cursor: "default",
+    },
+
+    [`&:not(.${classes["back-card"]})`]: {
+        cursor: "pointer",
+        [`&:not(.${classes["drawn-card"]}):hover`]: {
+            transform: `
+                rotate(${angle}deg)
+                translateY(-15%)
+            `,
         },
-        [`& .${playingCardClasses.img}`]: {
-            position: "relative",
-            display: "block",
-            width: `${CARD_WIDTH}px`,
-        },
-    };
-};
+    },
+
+    [`&.${classes["drawn-card"]}`]: {
+        zIndex: drawnZIndex,
+        transform: `rotate(0deg) scale(.9) translate(-50%, -150%) !important`,
+    },
+
+    [`&.${playingCardClasses.root}`]: {
+        position: "absolute",
+        width: `${CARD_WIDTH}px`,
+        transform: `rotate(${angle}deg)`,
+        transformOrigin: "bottom left",
+        transitionDuration: "300ms !important",
+        transitionProperty: "all",
+        transitionTimingFunction: "ease",
+    },
+    [`& .${playingCardClasses.img}`]: {
+        position: "relative",
+        display: "block",
+        width: `${CARD_WIDTH}px`,
+    },
+});
 
 const _initCards = [1, 21, 32, 4, 40, 52, 7, 16, 46, 31, 23, 50, 11];
 
@@ -117,10 +97,30 @@ const CardHand = ({
 
     const highestZIndexRef = useRef(0);
     const [cards, setCards, cardsRef] = useStateRef({});
-    const [inHandCards, setInHandCards] = useState(initCards.length);
+    const [, setInHandCards, inHandCardsRef] = useStateRef(initCards.length);
     const cardRefs = useRef({});
     const copiedCardRefs = useRef({});
     const isMountedRef = useIsMounted();
+
+    const makeAngle = useCallback(
+        ({ index: cardIndex }) => {
+            const inHandCards = inHandCardsRef.current;
+            const angleDiff = inHandCards * 3;
+            return (
+                (cardIndex - (inHandCards - 1) / 2) * (fanAngle / inHandCards) -
+                (position === "bottom"
+                    ? angleDiff
+                    : position === "top"
+                    ? angleDiff + CARD_ROTATE_ANGLE * 2
+                    : position === "right"
+                    ? CARD_ROTATE_ANGLE + angleDiff
+                    : position === "left"
+                    ? -CARD_ROTATE_ANGLE + angleDiff
+                    : angleDiff)
+            );
+        },
+        [inHandCardsRef, position]
+    );
 
     const setCardFixed = useCallback((card) => {
         /** @type {HTMLDivElement} */
@@ -202,23 +202,21 @@ const CardHand = ({
                     .sort(([, a], [, b]) => a.index - b.index)
                     .map(([cardNum, card]) => (
                         <PlayingCard
+                            key={cardNum}
                             ref={
                                 cardRefs.current[cardNum] ??
                                 (cardRefs.current[cardNum] = createRef())
                             }
-                            key={cardNum}
                             onClick={drawCard(card)}
-                            {...{
-                                sx: makeCardSx({
-                                    index: card.index,
-                                    totalCards: inHandCards,
-                                    fanAngle,
-                                    position,
-                                    isOpponent,
-                                    isDrawn: card.isDrawn && card.drawnIndex,
-                                }),
-                                cardNum: isOpponent ? -1 : cardNum,
-                            }}
+                            cardNum={isOpponent ? -1 : cardNum}
+                            sx={makeCardSx({
+                                drawnZIndex: +card.isDrawn && card.drawnIndex,
+                                angle: makeAngle({ index: card.index }),
+                            })}
+                            className={clsx({
+                                [classes["back-card"]]: isOpponent,
+                                [classes["drawn-card"]]: card.isDrawn,
+                            })}
                         />
                     ))}
             </Box>
@@ -232,13 +230,13 @@ const CardHand = ({
                         key={`copy-${cardNum}`}
                         cardNum={isOpponent ? -1 : cardNum}
                         sx={makeCardSx({
-                            index: card.index,
-                            totalCards: inHandCards,
-                            fanAngle,
-                            position,
-                            isOpponent,
-                            isDrawn: card.isDrawn && card.drawnIndex,
-                            isCopyCard: true,
+                            drawnZIndex: +card.isDrawn && card.drawnIndex,
+                            angle: makeAngle({ index: card.index }),
+                        })}
+                        className={clsx({
+                            [classes["copy-card"]]: true,
+                            [classes["back-card"]]: isOpponent,
+                            [classes["drawn-card"]]: card.isDrawn,
                         })}
                     />
                 ) : null
