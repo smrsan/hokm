@@ -4,9 +4,7 @@ import CardsTable from "./components/CardsTable";
 function App() {
     return (
         <CardsTable>
-            {/* <CardHand isOpponent position="top" />
-            <CardHand isOpponent position="left" />
-            <CardHand isOpponent position="right" /> */}
+            <CardHand isOpponent position="top" />
             <CardHand position="bottom" />
         </CardsTable>
     );
