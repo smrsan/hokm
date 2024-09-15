@@ -1,11 +1,11 @@
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
 import PlayingCard from "./PlayingCard/PlayingCard";
 import { playingCardClasses } from "./PlayingCard/styles";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import useStateRef from "../hooks/useStateRef";
 
 const CARD_WIDTH = 100;
 const CARD_ROTATE_ANGLE = 90;
-const CARD_ROTATE_DIFF = 35;
 
 /** @type {(cardNum: number) => import("@mui/material").BoxProps["sx"]} */
 const makeRootSx = ({ position }) => {
@@ -48,17 +48,18 @@ const makeCardSx = ({
     isOpponent,
     isDrawn,
 }) => {
+    const angleDiff = totalCards * 3;
     const angle =
         (index - (totalCards - 1) / 2) * (fanAngle / totalCards) -
         (position === "bottom"
-            ? CARD_ROTATE_DIFF
+            ? angleDiff
             : position === "top"
-            ? CARD_ROTATE_DIFF + CARD_ROTATE_ANGLE * 2
+            ? angleDiff + CARD_ROTATE_ANGLE * 2
             : position === "right"
-            ? CARD_ROTATE_ANGLE + CARD_ROTATE_DIFF
+            ? CARD_ROTATE_ANGLE + angleDiff
             : position === "left"
-            ? -CARD_ROTATE_ANGLE + CARD_ROTATE_DIFF
-            : CARD_ROTATE_DIFF);
+            ? -CARD_ROTATE_ANGLE + angleDiff
+            : angleDiff);
 
     return {
         [`&.${playingCardClasses.root}`]: {
@@ -75,9 +76,9 @@ const makeCardSx = ({
                 : {
                       "&:hover": {
                           transform: `
-                    rotate(${angle}deg)
-                    translateY(-15%)
-                `,
+                            rotate(${angle}deg)
+                            translateY(-15%)
+                        `,
                       },
                   }),
             ...(isDrawn
@@ -97,37 +98,88 @@ const makeCardSx = ({
     };
 };
 
-const CardHand = ({ position = "right", isOpponent = false }) => {
-    const totalCards = 13;
+const _initCards = [1, 21, 32, 4, 40, 52, 7, 16, 46, 31, 23, 50, 11];
+
+const CardHand = ({
+    position = "right",
+    isOpponent = false,
+    initCards = _initCards,
+}) => {
     const fanAngle = 135;
 
     const highestZIndexRef = useRef(0);
-    const [isDrawn, setisDrawn] = useState({});
+    const [cards, setCards, cardsRef] = useStateRef({});
+    const [inHandCards, setInHandCards] = useState(initCards.length);
+
+    const drawCard = useCallback(
+        (card) => () => {
+            const p = cardsRef.current;
+
+            const shouldDraw = !p[card.num].isDrawn;
+
+            setInHandCards((p) => (p += shouldDraw ? -1 : +1));
+
+            for (const num in p) {
+                const c = p[num];
+
+                if (c.num === card.num) {
+                    c.isDrawn = shouldDraw;
+                    if (shouldDraw) {
+                        c.drawnIndex = ++highestZIndexRef.current;
+                    }
+                    continue;
+                }
+
+                if (c.index >= card.index && !c.isDrawn) {
+                    c.index += shouldDraw ? -1 : +1;
+                    continue;
+                }
+            }
+
+            setCards({ ...p });
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        []
+    );
+
+    useEffect(() => {
+        const cards = {};
+
+        for (let i = 0; i < initCards.length; i++) {
+            const num = initCards[i];
+            cards[num] = {
+                isDrawn: false,
+                index: i,
+                num,
+                drawnIndex: 0,
+            };
+        }
+
+        setCards(cards);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initCards]);
 
     return (
         <Box sx={makeRootSx({ position })}>
-            {Array.from({ length: 13 }).map((_, i) => (
-                <PlayingCard
-                    key={i}
-                    onClick={() =>
-                        setisDrawn((p) => ({
-                            ...p,
-                            [i]: p[i] ? false : ++highestZIndexRef.current,
-                        }))
-                    }
-                    {...{
-                        sx: makeCardSx({
-                            index: i,
-                            totalCards,
-                            fanAngle,
-                            position,
-                            isOpponent,
-                            isDrawn: isDrawn[i],
-                        }),
-                        cardNum: isOpponent ? -1 : i + 1,
-                    }}
-                />
-            ))}
+            {Object.entries(cards)
+                .sort(([, a], [, b]) => a.index - b.index)
+                .map(([cardNum, card]) => (
+                    <PlayingCard
+                        key={cardNum}
+                        onClick={drawCard(card)}
+                        {...{
+                            sx: makeCardSx({
+                                index: card.index,
+                                totalCards: inHandCards,
+                                fanAngle,
+                                position,
+                                isOpponent,
+                                isDrawn: card.isDrawn && card.drawnIndex,
+                            }),
+                            cardNum: isOpponent ? -1 : cardNum,
+                        }}
+                    />
+                ))}
         </Box>
     );
 };
