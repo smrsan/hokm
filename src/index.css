@@ -13,16 +13,21 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+html,
+body {
+    touch-action: manipulation; /* Disables pinch and zoom */
+}
+
 body {
     margin: 0;
     padding: 0;
     width: 100vw;
     min-height: 100vh;
     position: relative;
-}
-
-* {
-  user-select: none;
-  -moz-user-select: none;
-  -webkit-user-select: none;
 }
