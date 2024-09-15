@@ -1,161 +1,33 @@
-import Box from "@mui/material/Box";
+import { Box } from "@mui/material";
 import PlayingCard from "./PlayingCard/PlayingCard";
-import { playingCardClasses } from "./PlayingCard/styles";
-import { createRef, useCallback, useEffect, useRef } from "react";
-import useStateRef from "../hooks/useStateRef";
-import useIsMounted from "../hooks/useIsMounted";
 import makeClassNames from "../utils/makeClassNames";
 import clsx from "clsx";
-
-const CARD_WIDTH = 100;
-const CARD_ROTATE_ANGLE = 90;
-const CARDS_FAN_ANGLE = 135;
+import useStateRef from "../hooks/useStateRef";
+import { useEffect } from "react";
 
 const classes = makeClassNames("CardHand", [
-    "pos-top",
-    "pos-left",
-    "pos-right",
-    "pos-bottom",
+    "top",
+    "left",
+    "right",
+    "bottom",
 
-    "copy-card",
-    "back-card",
-    "drawn-card",
+    "opponent",
 ]);
-
-/** @type {import("@mui/material").BoxProps["sx"]} */
-const rootSx = {
-    position: "fixed",
-    placeItems: "center",
-
-    [`&.${classes["pos-top"]}`]: {
-        top: -CARD_WIDTH * 2.1,
-        right: "50%",
-    },
-    [`&.${classes["pos-bottom"]}`]: {
-        bottom: CARD_WIDTH * 2 + 10,
-        left: "50%",
-    },
-    [`&.${classes["pos-right"]}`]: {
-        bottom: `calc(50% + ${CARD_WIDTH}px)`,
-        right: -CARD_WIDTH * 0.6,
-    },
-    [`&.${classes["pos-left"]}`]: {
-        bottom: `calc(50% + ${CARD_WIDTH * 2}px)`,
-        left: -CARD_WIDTH * 0.6,
-    },
-};
-
-/** @type {(props: Object) => import("@mui/material").BoxProps["sx"]} */
-const makeCardSx = ({ drawnZIndex, angle }) => ({
-    [`&.${classes["copy-card"]}`]: {
-        opacity: 0,
-        pointerEvents: "none",
-    },
-
-    [`&.${classes["back-card"]}`]: {
-        cursor: "default",
-    },
-
-    [`&:not(.${classes["back-card"]})`]: {
-        cursor: "pointer",
-        [`&:not(.${classes["drawn-card"]}):hover`]: {
-            transform: `
-                rotate(${angle}deg)
-                translateY(-15%)
-            `,
-        },
-    },
-
-    [`&.${classes["drawn-card"]}`]: {
-        zIndex: drawnZIndex,
-        transform: `rotate(0deg) scale(.9) translate(-50%, -150%) !important`,
-    },
-
-    [`&.${playingCardClasses.root}`]: {
-        position: "absolute",
-        width: `${CARD_WIDTH}px`,
-        transform: `rotate(${angle}deg)`,
-        transformOrigin: "bottom left",
-        transitionDuration: "300ms !important",
-        transitionProperty: "all",
-        transitionTimingFunction: "ease",
-    },
-    [`& .${playingCardClasses.img}`]: {
-        position: "relative",
-        display: "block",
-        width: `${CARD_WIDTH}px`,
-    },
-});
-
 const _initCards = [1, 21, 32, 4, 40, 52, 7, 16, 46, 31, 23, 50, 11];
 
-const CardHand = ({
-    position = "right",
-    isOpponent = false,
-    initCards = _initCards,
-}) => {
-    const highestZIndexRef = useRef(0);
-    const [cards, setCards, cardsRef] = useStateRef({});
-    const [inHandCards, setInHandCards] = useStateRef(initCards.length);
-    const cardRefs = useRef({});
-    const copiedCardRefs = useRef({});
-    const isMountedRef = useIsMounted();
+/**
+ * @typedef {Object} CardHandProps
+ * @property {"top" | "left" | "right" | "bottom"} position
+ */
 
-    const setCardFixed = useCallback((card) => {
-        /** @type {HTMLDivElement} */
-        const cardElem = cardRefs.current[card.num].current;
-        /** @type {HTMLDivElement} */
-        const drawnCardElem = copiedCardRefs.current[card.num].current;
-
-        const rect = cardElem.getBoundingClientRect();
-        const computedStyle = window.getComputedStyle(cardElem);
-        const matrix = new DOMMatrix(computedStyle.transform);
-
-        drawnCardElem.style.top = `
-            calc(
-                ${rect.top - matrix.m42}px - ${rect.height * 0.11}px
-            )
-        `;
-        drawnCardElem.style.left = rect.left - matrix.m41 + "px";
-        drawnCardElem.style.position = "fixed";
-    }, []);
-
-    const drawCard = useCallback(
-        (card) => () => {
-            const p = cardsRef.current;
-
-            const shouldDraw = !p[card.num].isDrawn;
-
-            setInHandCards((p) => (p += shouldDraw ? -1 : +1));
-
-            for (const num in p) {
-                const c = p[num];
-
-                if (c.num === card.num) {
-                    c.isDrawn = shouldDraw;
-                    if (shouldDraw) {
-                        c.drawnIndex = ++highestZIndexRef.current;
-                    }
-                    continue;
-                }
-
-                if (c.index >= card.index && !c.isDrawn) {
-                    c.index += shouldDraw ? -1 : +1;
-                    continue;
-                }
-            }
-
-            setTimeout(() => {
-                if (!isMountedRef.current) return;
-                if (!card.isDrawn) return;
-                setCardFixed(card);
-            }, 300);
-
-            setCards({ ...p });
-        },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [setCardFixed]
-    );
+/**
+ * CardHand
+ * @param {CardHandProps} props
+ * @returns  {JSXElement}
+ */
+const CardHand = ({ position, initCards = _initCards }) => {
+    const [cards, setCards] = useStateRef({});
+    const isYou = position === "bottom";
 
     useEffect(() => {
         const cards = {};
@@ -176,76 +48,69 @@ const CardHand = ({
 
     return (
         <>
-            <Box sx={rootSx} className={clsx(classes[`pos-${position}`])}>
-                {Object.entries(cards)
-                    .sort(([, a], [, b]) => a.index - b.index)
-                    .map(([cardNum, card]) => (
-                        <PlayingCard
-                            key={cardNum}
-                            ref={
-                                cardRefs.current[cardNum] ??
-                                (cardRefs.current[cardNum] = createRef())
-                            }
-                            onClick={drawCard(card)}
-                            cardNum={isOpponent ? -1 : cardNum}
-                            sx={makeCardSx({
-                                drawnZIndex: +card.isDrawn && card.drawnIndex,
-                                angle: makeAngle({
-                                    position,
-                                    index: card.index,
-                                    inHandCards,
-                                }),
-                            })}
-                            className={clsx({
-                                [classes["back-card"]]: isOpponent,
-                                [classes["drawn-card"]]: card.isDrawn,
-                            })}
-                        />
-                    ))}
-            </Box>
-            {Object.entries(cards).map(([cardNum, card]) =>
-                card.isDrawn ? (
+            <Box
+                sx={{
+                    position: "fixed",
+                    zIndex: isYou ? 100 : "unset",
+                }}
+            >
+                {Object.entries(cards).map(([cardNum, card]) => (
                     <PlayingCard
-                        ref={
-                            copiedCardRefs.current[cardNum] ??
-                            (copiedCardRefs.current[cardNum] = createRef())
-                        }
-                        key={`copy-${cardNum}`}
-                        cardNum={isOpponent ? -1 : cardNum}
-                        sx={makeCardSx({
-                            drawnZIndex: +card.isDrawn && card.drawnIndex,
-                            angle: makeAngle({
-                                position,
-                                index: card.index,
-                                inHandCards,
-                            }),
+                        key={cardNum}
+                        cardNum={isYou ? cardNum : -1}
+                        className={clsx(classes[position], {
+                            [classes.opponent]: position !== "bottom",
                         })}
-                        className={clsx({
-                            [classes["copy-card"]]: true,
-                            [classes["back-card"]]: isOpponent,
-                            [classes["drawn-card"]]: card.isDrawn,
-                        })}
+                        sx={{
+                            position: "fixed",
+                            width: "20vw",
+                            transformOrigin: "center center",
+                            zIndex: card.index,
+                            transition: "all ease .1s",
+                            cursor: isYou ? "pointer" : "default",
+
+                            [`&:not(.${classes.opponent}):hover`]: {
+                                translate: "0 -25px",
+                            },
+
+                            [`&.${classes.top}`]: {
+                                top: 10,
+                                right: 50,
+                                transform: `
+                                    translateX(-${card.index * 20}px)
+                                    rotate(180deg)
+                                `,
+                            },
+                            [`&.${classes.left}`]: {
+                                top: 175,
+                                left: -35,
+                                transform: `
+                                    translateY(${card.index * 20}px)
+                                    rotate(90deg)
+                                `,
+                            },
+                            [`&.${classes.right}`]: {
+                                bottom: 175,
+                                right: -35,
+                                transform: `
+                                    translateY(-${card.index * 20}px)
+                                    rotate(-90deg)
+                                `,
+                            },
+                            [`&.${classes.bottom}`]: {
+                                bottom: 10,
+                                left: 50,
+                                transform: `
+                                    translateX(${card.index * 20}px)
+                                    rotate(0deg)
+                                `,
+                            },
+                        }}
                     />
-                ) : null
-            )}
+                ))}
+            </Box>
         </>
     );
 };
 
 export default CardHand;
-
-const makeAngle = ({ index: cardIndex, position, inHandCards }) => {
-    const angleDiff = inHandCards * 3;
-    return (
-        (cardIndex - (inHandCards - 1) / 2) * (CARDS_FAN_ANGLE / inHandCards) -
-        (position === "bottom"
-            ? angleDiff
-            : position === "top"
-            ? angleDiff + CARD_ROTATE_ANGLE * 2
-            : position === "right"
-            ? CARD_ROTATE_ANGLE + angleDiff
-            : position === "left"
-            ? -CARD_ROTATE_ANGLE + angleDiff
-            : angleDiff)
-    );
-};
