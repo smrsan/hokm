@@ -1,8 +1,9 @@
 import Box from "@mui/material/Box";
 import PlayingCard from "./PlayingCard/PlayingCard";
 import { playingCardClasses } from "./PlayingCard/styles";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { createRef, useCallback, useEffect, useRef, useState } from "react";
 import useStateRef from "../hooks/useStateRef";
+import useIsMounted from "../hooks/useIsMounted";
 
 const CARD_WIDTH = 100;
 const CARD_ROTATE_ANGLE = 90;
@@ -47,6 +48,7 @@ const makeCardSx = ({
     position,
     isOpponent,
     isDrawn,
+    isCopyCard,
 }) => {
     const angleDiff = totalCards * 3;
     const angle =
@@ -63,7 +65,13 @@ const makeCardSx = ({
 
     return {
         [`&.${playingCardClasses.root}`]: {
-            position: "absolute",
+            ...(isCopyCard
+                ? {
+                      pointerEvents: "none",
+                  }
+                : {
+                      position: "absolute",
+                  }),
             width: `${CARD_WIDTH}px`,
             transform: `rotate(${angle}deg)`,
             transformOrigin: "bottom left",
@@ -84,8 +92,7 @@ const makeCardSx = ({
             ...(isDrawn
                 ? {
                       zIndex: isDrawn,
-                      transform: `rotate(0deg) scale(.9)`,
-                      translate: "-50% -150%",
+                      transform: `rotate(0deg) scale(.9) translate(-50%, -150%)`,
                       "&:hover": {},
                   }
                 : {}),
@@ -110,6 +117,28 @@ const CardHand = ({
     const highestZIndexRef = useRef(0);
     const [cards, setCards, cardsRef] = useStateRef({});
     const [inHandCards, setInHandCards] = useState(initCards.length);
+    const cardRefs = useRef({});
+    const copiedCardRefs = useRef({});
+    const isMountedRef = useIsMounted();
+
+    const setCardFixed = useCallback((card) => {
+        /** @type {HTMLDivElement} */
+        const cardElem = cardRefs.current[card.num].current;
+        /** @type {HTMLDivElement} */
+        const drawnCardElem = copiedCardRefs.current[card.num].current;
+
+        const rect = cardElem.getBoundingClientRect();
+        const computedStyle = window.getComputedStyle(cardElem);
+        const matrix = new DOMMatrix(computedStyle.transform);
+
+        drawnCardElem.style.top = `
+            calc(
+                ${rect.top - matrix.m42}px - ${rect.height * 0.11}px
+            )
+        `;
+        drawnCardElem.style.left = rect.left - matrix.m41 + "px";
+        drawnCardElem.style.position = "fixed";
+    }, []);
 
     const drawCard = useCallback(
         (card) => () => {
@@ -136,10 +165,16 @@ const CardHand = ({
                 }
             }
 
+            setTimeout(() => {
+                if (!isMountedRef.current) return;
+                if (!card.isDrawn) return;
+                setCardFixed(card);
+            }, 300);
+
             setCards({ ...p });
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        []
+        [setCardFixed]
     );
 
     useEffect(() => {
@@ -160,27 +195,54 @@ const CardHand = ({
     }, [initCards]);
 
     return (
-        <Box sx={makeRootSx({ position })}>
-            {Object.entries(cards)
-                .sort(([, a], [, b]) => a.index - b.index)
-                .map(([cardNum, card]) => (
+        <>
+            <Box sx={makeRootSx({ position })}>
+                {Object.entries(cards)
+                    .sort(([, a], [, b]) => a.index - b.index)
+                    .map(([cardNum, card]) => (
+                        <PlayingCard
+                            ref={
+                                cardRefs.current[cardNum] ??
+                                (cardRefs.current[cardNum] = createRef())
+                            }
+                            key={cardNum}
+                            onClick={drawCard(card)}
+                            {...{
+                                sx: makeCardSx({
+                                    index: card.index,
+                                    totalCards: inHandCards,
+                                    fanAngle,
+                                    position,
+                                    isOpponent,
+                                    isDrawn: card.isDrawn && card.drawnIndex,
+                                }),
+                                cardNum: isOpponent ? -1 : cardNum,
+                            }}
+                        />
+                    ))}
+            </Box>
+            {Object.entries(cards).map(([cardNum, card]) =>
+                card.isDrawn ? (
                     <PlayingCard
-                        key={cardNum}
-                        onClick={drawCard(card)}
-                        {...{
-                            sx: makeCardSx({
-                                index: card.index,
-                                totalCards: inHandCards,
-                                fanAngle,
-                                position,
-                                isOpponent,
-                                isDrawn: card.isDrawn && card.drawnIndex,
-                            }),
-                            cardNum: isOpponent ? -1 : cardNum,
-                        }}
+                        ref={
+                            copiedCardRefs.current[cardNum] ??
+                            (copiedCardRefs.current[cardNum] = createRef())
+                        }
+                        key={`copy-${cardNum}`}
+                        cardNum={isOpponent ? -1 : cardNum}
+                        sx={makeCardSx({
+                            index: card.index,
+                            totalCards: inHandCards,
+                            fanAngle,
+                            position,
+                            isOpponent,
+                            isDrawn: card.isDrawn && card.drawnIndex,
+                            isCopyCard: true,
+                        })}
                     />
-                ))}
-        </Box>
+                ) : null
+            )}
+        </>
     );
 };
 
