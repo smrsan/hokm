@@ -67,6 +67,7 @@ const makeCardSx = ({
         [`&.${playingCardClasses.root}`]: {
             ...(isCopyCard
                 ? {
+                      opacity: 0,
                       pointerEvents: "none",
                   }
                 : {
