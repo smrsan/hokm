@@ -10,6 +10,8 @@ export const playingCardClasses = makeClassNames("PlayingCard", [
 
 /** @type {import("@mui/material").BoxProps["sx"]} */
 export const playingCardRootSx = {
+    width: 200,
+    position: "relative",
     aspectRatio: "223 / 324",
     borderRadius: "8px",
     overflow: "hidden",
@@ -40,14 +42,19 @@ export const playingCardRootSx = {
     },
 
     [`& .${playingCardClasses.img}`]: {
+        position: "relative",
+        display: "block",
         aspectRatio: "223 / 324",
-        width: 200,
+        width: "100%",
         overflow: "hidden",
         border: "1px solid black",
-        [`&.${playingCardClasses["img-error"]}, &:not(.${playingCardClasses["img-error"]})`]:
-            {
-                opacity: 0,
-            },
+
+        "&:after": {
+            display: "block",
+            width: "100%",
+            height: "100%",
+        },
+
         [`&.${playingCardClasses["img-loaded"]}:not(.${playingCardClasses["img-error"]})`]:
             {
                 border: "none",
