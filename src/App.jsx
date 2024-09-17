@@ -1,13 +1,12 @@
-import CardHand from "./components/LinearCardHand";
+import CardHand from "./components/CardHand";
 import CardsTable from "./components/CardsTable";
 
 function App() {
     return (
         <CardsTable>
-            <CardHand position="top" />
-            <CardHand position="left" />
-            <CardHand position="right" />
-            <CardHand position="bottom" />
+            <CardHand isOpponent position="top" />
+            <CardHand isOpponent position="left" />
+            <CardHand isOpponent position="right" />
         </CardsTable>
     );
 }
