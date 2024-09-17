@@ -1,4 +1,4 @@
-import CardHand from "./components/CardHand";
+import CardHand from "./components/LinearCardHand";
 import CardsTable from "./components/CardsTable";
 
 function App() {
