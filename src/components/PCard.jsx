@@ -1,9 +1,10 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 import Box from "@mui/material/Box";
 import { useGrabbedCard } from "../stores/grabbedCard";
 import { CARD_HIDING_DURATION } from "../constants";
 import clsx from "clsx";
+import { useHandCards } from "../stores/handCards";
 
 const CARD_WIDTH = "min(16vw, 16vh)";
 
@@ -21,6 +22,13 @@ const PCard = ({ card, sx, grabbable = false }) => {
     const mouseMoveHandlerRef = useRef();
     const [isDragging, setIsDragging] = useState(false);
     const grabCard = useGrabbedCard((state) => state.grab);
+    const handCards = useHandCards((state) => state.cards);
+    const isLastCard = useMemo(() => {
+        return (
+            handCards.length - 1 ===
+            handCards.findIndex((c) => c.num === card.num)
+        );
+    }, [card.num, handCards]);
 
     const adjustGrabbedCardPos = useCallback(
         /** @param {MouseEvent} e  */
@@ -103,9 +111,11 @@ const PCard = ({ card, sx, grabbable = false }) => {
                     opacity: isDragging || card.hidden ? 0 : 1,
                     ...sx,
                     cursor: grabbable ? "grab" : "default",
-                    transition: `margin-right ease ${CARD_HIDING_DURATION}ms`,
                     "&.hideMePlz": {
-                        mr: `calc(-1 * ${CARD_WIDTH})`,
+                        transitionTimingFunction: "ease",
+                        transitionProperty: "margin-right, margin-left",
+                        transitionDuration: `${CARD_HIDING_DURATION}ms`,
+                        [isLastCard ? "ml" : "mr"]: `calc(-1 * ${CARD_WIDTH})`,
                     },
                 }}
                 className={clsx({
