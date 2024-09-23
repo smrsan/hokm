@@ -4,9 +4,8 @@ import { Stack } from "@mui/material";
 
 function Game() {
     return (
-        <Stack container width="100vw" height="100vh" flexDirection="column">
+        <Stack width="100vw" height="100vh">
             <Stack
-                container
                 height="calc(100vh / 3)"
                 alignItems="flex-start"
                 justifyContent="center"
@@ -17,9 +16,7 @@ function Game() {
                 <PCard card={37} />
             </Stack>
             <Stack
-                container
                 height="calc(100vh / 3)"
-                flexDirection="row"
                 alignItems="center"
                 justifyContent="space-between"
                 overflow="hidden"
@@ -31,7 +28,6 @@ function Game() {
                 <PCard card={38} />
             </Stack>
             <Stack
-                container
                 width="100vw"
                 height="calc(100vh / 3)"
                 alignItems="flex-end"
