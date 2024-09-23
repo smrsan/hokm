@@ -1,6 +1,7 @@
+import Stack from "@mui/material/Stack";
 import PCard from "./components/PCard";
 import Hand from "./components/Hand";
-import { Stack } from "@mui/material";
+import PTable from "./components/PTable";
 
 function Game() {
     return (
@@ -9,7 +10,6 @@ function Game() {
                 height="calc(100vh / 3)"
                 alignItems="flex-start"
                 justifyContent="center"
-                overflow="hidden"
                 pt="5px"
                 direction="row"
             >
@@ -19,12 +19,11 @@ function Game() {
                 height="calc(100vh / 3)"
                 alignItems="center"
                 justifyContent="space-between"
-                overflow="hidden"
                 px={1}
                 direction="row"
             >
                 <PCard card={26} />
-                <PCard card={1} />
+                <PTable />
                 <PCard card={38} />
             </Stack>
             <Stack
@@ -32,7 +31,6 @@ function Game() {
                 height="calc(100vh / 3)"
                 alignItems="flex-end"
                 justifyContent="center"
-                overflow="hidden"
                 pb="5px"
                 direction="row"
             >
