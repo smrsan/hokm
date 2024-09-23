@@ -30,8 +30,8 @@ const PCard = ({ card, sx, draggable = false }) => {
             const grabbedCard = grabbedCardRef.current;
             const cardRect = grabbedCard.getBoundingClientRect();
 
-            const pt = cardRect.height - cardRect.height * 0.2;
-            const pl = cardRect.width - cardRect.width * 0.3;
+            const pt = cardRect.height / 2 - 8;
+            const pl = cardRect.width / 2 - 8;
 
             grabbedCard.style.top = y - pt + "px";
             grabbedCard.style.left = x - pl + "px";
