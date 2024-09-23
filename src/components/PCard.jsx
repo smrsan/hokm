@@ -81,9 +81,8 @@ const PCard = ({ card, sx, grabbable = false }) => {
                     return;
                 }
                 setIsDragging(true);
+                await new Promise((r) => setTimeout(r));
             }
-
-            isMobile && (await new Promise((r) => setTimeout(r)));
 
             adjustGrabbedCardPos(e);
         },
