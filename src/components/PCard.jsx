@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 import Box from "@mui/material/Box";
+import { useGrabbedCard } from "../stores/grabbedCard";
 
 /**
  * PCard
@@ -15,6 +16,7 @@ const PCard = ({ card, sx, draggable = false }) => {
     const grabbedCardRef = useRef();
     const mouseMoveHandlerRef = useRef();
     const [isDragging, setIsDragging] = useState(false);
+    const grabCard = useGrabbedCard((state) => state.grab);
 
     const adjustGrabbedCardPos = useCallback(
         /** @param {MouseEvent} e  */
@@ -54,6 +56,8 @@ const PCard = ({ card, sx, draggable = false }) => {
         (e) => {
             if (!draggable) return;
 
+            grabCard({ card });
+
             setIsDragging(true);
             !isMobile && setTimeout(() => adjustGrabbedCardPos(e));
 
@@ -70,7 +74,7 @@ const PCard = ({ card, sx, draggable = false }) => {
             );
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [draggable, adjustGrabbedCardPos]
+        [draggable, adjustGrabbedCardPos, card]
     );
 
     return (
