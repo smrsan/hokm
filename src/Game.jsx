@@ -1,7 +1,7 @@
 import Stack from "@mui/material/Stack";
-import PCard from "./components/PCard";
 import Hand from "./components/Hand";
 import PTable from "./components/PTable";
+import Profile from "./components/Profile";
 
 function Game() {
     return (
@@ -13,7 +13,7 @@ function Game() {
                 pt="5px"
                 direction="row"
             >
-                <PCard card={37} />
+                <Profile male name={"Reza"} />
             </Stack>
             <Stack
                 height="calc(100vh / 3)"
@@ -22,9 +22,9 @@ function Game() {
                 px={1}
                 direction="row"
             >
-                <PCard card={26} />
+                <Profile male name={"Ali"} />
                 <PTable />
-                <PCard card={38} />
+                <Profile male={false} name={"Melika"} />
             </Stack>
             <Stack
                 width="100vw"
