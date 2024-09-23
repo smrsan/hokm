@@ -83,11 +83,13 @@ const PTable = () => {
             ref={boxRef}
             sx={{
                 position: "relative",
-                width: "40vw",
+                width: "min(40vw, 40vh)",
                 aspectRatio: "1 / 1",
+                // border: (theme) => `1px solid ${theme.palette.primary.main}`,
                 border: isGrabbedCardOver
                     ? (theme) => `1px solid ${theme.palette.primary.main}`
                     : "none",
+                borderRadius: "8px",
             }}
         >
             {tableCards.map((card, i) => {
