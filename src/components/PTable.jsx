@@ -90,10 +90,10 @@ const PTable = () => {
                     : "none",
             }}
         >
-            {tableCards.map((card) => {
+            {tableCards.map((card, i) => {
                 return (
                     <PCard
-                        key={card.num}
+                        key={card.num + "-" + i}
                         card={card.num}
                         sx={{
                             position: "absolute",
