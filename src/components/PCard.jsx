@@ -55,7 +55,7 @@ const PCard = ({ card, sx, draggable = false }) => {
             if (!draggable) return;
 
             setIsDragging(true);
-            setTimeout(() => adjustGrabbedCardPos(e));
+            !isMobile && setTimeout(() => adjustGrabbedCardPos(e));
 
             window.addEventListener(
                 isMobile ? "touchend" : "mouseup",
