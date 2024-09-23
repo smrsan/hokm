@@ -13,7 +13,7 @@ function Game() {
                 overflow="hidden"
                 pt="5px"
             >
-                <PCard card={1} />
+                <PCard card={37} />
             </Grid>
             <Grid
                 container
@@ -22,10 +22,11 @@ function Game() {
                 alignItems="center"
                 justifyContent="space-between"
                 overflow="hidden"
+                px={1}
             >
+                <PCard card={26} />
                 <PCard card={1} />
-                <PCard card={1} />
-                <PCard card={1} />
+                <PCard card={38} />
             </Grid>
             <Grid
                 container
