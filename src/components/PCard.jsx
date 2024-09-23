@@ -29,6 +29,8 @@ const PCard = ({ card, sx, grabbable = false }) => {
             handCards.findIndex((c) => c.num === card.num)
         );
     }, [card.num, handCards]);
+    const isGrabThresholdCheckedRef = useRef(false);
+    const grabStartXYRef = useRef();
 
     const adjustGrabbedCardPos = useCallback(
         /** @param {MouseEvent} e  */
@@ -53,14 +55,6 @@ const PCard = ({ card, sx, grabbable = false }) => {
         []
     );
 
-    const handleMouseMove = useCallback(
-        /** @param {MouseEvent} e  */
-        (e) => {
-            adjustGrabbedCardPos(e);
-        },
-        [adjustGrabbedCardPos]
-    );
-
     const handleMouseUp = useCallback(() => {
         setIsDragging(false);
 
@@ -70,14 +64,49 @@ const PCard = ({ card, sx, grabbable = false }) => {
         );
     }, []);
 
+    const handleMouseMove = useCallback(
+        /** @param {MouseEvent} e  */
+        async (e) => {
+            if (isMobile && !isGrabThresholdCheckedRef.current) {
+                isGrabThresholdCheckedRef.current = true;
+                const touch = e.touches[0];
+                const diffX = Math.abs(
+                    grabStartXYRef.current[0] - touch.clientX
+                );
+                const diffY = Math.abs(
+                    grabStartXYRef.current[1] - touch.clientY
+                );
+                if (diffX > diffY) {
+                    handleMouseUp();
+                    return;
+                }
+                setIsDragging(true);
+            }
+
+            isMobile && (await new Promise((r) => setTimeout(r)));
+
+            adjustGrabbedCardPos(e);
+        },
+        [adjustGrabbedCardPos, handleMouseUp]
+    );
+
     const handleMouseDown = useCallback(
         (e) => {
             if (!grabbable) return;
 
             grabCard({ num: card.num });
 
-            setIsDragging(true);
-            !isMobile && setTimeout(() => adjustGrabbedCardPos(e));
+            if (isMobile) {
+                // Check whether user is scrolling or grabbing
+                isGrabThresholdCheckedRef.current = false;
+                grabStartXYRef.current = [
+                    e.touches[0].clientX,
+                    e.touches[0].clientY,
+                ];
+            } else {
+                setIsDragging(true);
+                setTimeout(() => adjustGrabbedCardPos(e));
+            }
 
             window.addEventListener(
                 isMobile ? "touchend" : "mouseup",
