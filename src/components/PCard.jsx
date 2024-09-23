@@ -16,7 +16,7 @@ const PCard = ({ card, sx, draggable = false }) => {
     const mouseMoveHandlerRef = useRef();
     const [isDragging, setIsDragging] = useState(false);
 
-    const handleMouseMove = useCallback(
+    const adjustGrabbedCardPos = useCallback(
         /** @param {MouseEvent} e  */
         (e) => {
             const touch = isMobile ? e.touches[0] : null;
@@ -25,12 +25,20 @@ const PCard = ({ card, sx, draggable = false }) => {
                 : [e.clientX, e.clientY];
             const grabbedCard = grabbedCardRef.current;
 
-            grabbedCard.style.top = y - 10 + "px";
-            grabbedCard.style.left = x - 10 + "px";
+            grabbedCard.style.top = y - 25 + "px";
+            grabbedCard.style.left = x - 25 + "px";
             grabbedCard.style.bottom = "auto";
             grabbedCard.style.right = "auto";
         },
         []
+    );
+
+    const handleMouseMove = useCallback(
+        /** @param {MouseEvent} e  */
+        (e) => {
+            adjustGrabbedCardPos(e);
+        },
+        [adjustGrabbedCardPos]
     );
 
     const handleMouseUp = useCallback(() => {
@@ -42,25 +50,28 @@ const PCard = ({ card, sx, draggable = false }) => {
         );
     }, []);
 
-    const handleMouseDown = useCallback(() => {
-        if (!draggable) return;
+    const handleMouseDown = useCallback(
+        (e) => {
+            if (!draggable) return;
 
-        setIsDragging(true);
+            setIsDragging(true);
+            setTimeout(() => adjustGrabbedCardPos(e));
 
-        window.addEventListener(
-            isMobile ? "touchend" : "mouseup",
-            handleMouseUp,
-            {
-                once: true,
-            }
-        );
-        window.addEventListener(
-            isMobile ? "touchmove" : "mousemove",
-            (mouseMoveHandlerRef.current = handleMouseMove)
-        );
-
+            window.addEventListener(
+                isMobile ? "touchend" : "mouseup",
+                handleMouseUp,
+                {
+                    once: true,
+                }
+            );
+            window.addEventListener(
+                isMobile ? "touchmove" : "mousemove",
+                (mouseMoveHandlerRef.current = handleMouseMove)
+            );
+        },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [draggable]);
+        [draggable, adjustGrabbedCardPos]
+    );
 
     return (
         <>
