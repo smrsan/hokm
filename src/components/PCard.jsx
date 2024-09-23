@@ -140,6 +140,7 @@ const PCard = ({ card, sx, grabbable = false }) => {
                     ...sx,
                     cursor: grabbable ? "grab" : "default",
                     "&.hideMePlz": {
+                        pointerEvents: "none",
                         transitionTimingFunction: "ease",
                         transitionProperty: "margin-right, margin-left",
                         transitionDuration: `${CARD_HIDING_DURATION}ms`,
