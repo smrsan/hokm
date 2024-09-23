@@ -1,21 +1,22 @@
-import Grid from "@mui/material/Grid2";
 import PCard from "./components/PCard";
 import Hand from "./components/Hand";
+import { Stack } from "@mui/material";
 
 function Game() {
     return (
-        <Grid container width="100vw" height="100vh" flexDirection="column">
-            <Grid
+        <Stack container width="100vw" height="100vh" flexDirection="column">
+            <Stack
                 container
                 height="calc(100vh / 3)"
                 alignItems="flex-start"
                 justifyContent="center"
                 overflow="hidden"
                 pt="5px"
+                direction="row"
             >
                 <PCard card={37} />
-            </Grid>
-            <Grid
+            </Stack>
+            <Stack
                 container
                 height="calc(100vh / 3)"
                 flexDirection="row"
@@ -23,12 +24,13 @@ function Game() {
                 justifyContent="space-between"
                 overflow="hidden"
                 px={1}
+                direction="row"
             >
                 <PCard card={26} />
                 <PCard card={1} />
                 <PCard card={38} />
-            </Grid>
-            <Grid
+            </Stack>
+            <Stack
                 container
                 width="100vw"
                 height="calc(100vh / 3)"
@@ -36,10 +38,11 @@ function Game() {
                 justifyContent="center"
                 overflow="hidden"
                 pb="5px"
+                direction="row"
             >
                 <Hand />
-            </Grid>
-        </Grid>
+            </Stack>
+        </Stack>
     );
 }
 
