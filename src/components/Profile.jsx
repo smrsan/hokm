@@ -26,6 +26,7 @@ const Profile = ({ male = true, name = "N/A" }) => {
                     width: "100%",
                     textAlign: "center",
                 }}
+                variant="subtitle1"
             >
                 {name}
             </Typography>
