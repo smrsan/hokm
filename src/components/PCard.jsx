@@ -25,10 +25,16 @@ const PCard = ({ card, sx, draggable = false }) => {
             const [x, y] = isMobile
                 ? [touch.clientX, touch.clientY]
                 : [e.clientX, e.clientY];
-            const grabbedCard = grabbedCardRef.current;
 
-            grabbedCard.style.top = y - 25 + "px";
-            grabbedCard.style.left = x - 25 + "px";
+            /** @type {HTMLDivElement} */
+            const grabbedCard = grabbedCardRef.current;
+            const cardRect = grabbedCard.getBoundingClientRect();
+
+            const pt = cardRect.height - cardRect.height * 0.2;
+            const pl = cardRect.width - cardRect.width * 0.3;
+
+            grabbedCard.style.top = y - pt + "px";
+            grabbedCard.style.left = x - pl + "px";
             grabbedCard.style.bottom = "auto";
             grabbedCard.style.right = "auto";
         },
@@ -89,9 +95,7 @@ const PCard = ({ card, sx, draggable = false }) => {
                 onTouchStart={isMobile ? handleMouseDown : () => void 0}
                 sx={{
                     position: "relative",
-                    width: "auto",
-                    maxWidth: 100,
-                    maxHeight: "100%",
+                    width: "min(16vw, 16vh)",
                     opacity: isDragging ? 0 : 1,
                     ...sx,
                     cursor: draggable
@@ -110,15 +114,14 @@ const PCard = ({ card, sx, draggable = false }) => {
                     draggable={false}
                     sx={{
                         position: "fixed",
-                        width: "auto",
-                        maxWidth: 100,
-                        maxHeight: "100%",
+                        width: "min(20vw, 20vh)",
                         cursor: "grabbing",
                         zIndex: 1000,
                         border: "1px solid black",
                         borderRadius: "4px",
                         bottom: "100vh",
                         right: "100vw",
+                        transform: "rotate(5deg)",
                     }}
                 />
             )}
