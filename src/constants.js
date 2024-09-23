@@ -1,0 +1,1 @@
+export const CARD_HIDING_DURATION = 750;

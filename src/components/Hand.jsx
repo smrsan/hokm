@@ -1,8 +1,11 @@
 import Box from "@mui/material/Box";
 
 import PCard from "./PCard";
+import { useHandCards } from "../stores/handCards";
 
 const Hand = () => {
+    const handCards = useHandCards((state) => state.cards);
+
     return (
         <Box
             sx={{
@@ -25,12 +28,12 @@ const Hand = () => {
                     mb: "8px",
                 }}
             >
-                {Array.from({ length: 13 }).map((_, i) => (
+                {handCards.map((card, i) => (
                     <PCard
-                        key={i + 1}
+                        key={card.num + "-" + i}
                         {...{
-                            card: i + 1,
-                            draggable: true,
+                            card,
+                            grabbable: true,
                         }}
                         sx={{
                             cursor: "pointer",

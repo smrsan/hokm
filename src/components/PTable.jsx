@@ -4,6 +4,8 @@ import PCard from "./PCard";
 import { useGrabbedCard } from "../stores/grabbedCard";
 import { isMobile } from "react-device-detect";
 import { useTableCards } from "../stores/tableCards";
+import { useHandCards } from "../stores/handCards";
+import { CARD_HIDING_DURATION } from "../constants";
 
 const PTable = () => {
     const boxRef = useRef();
@@ -43,8 +45,13 @@ const PTable = () => {
 
             if (!isGrabbedCardOver) return;
 
+            useHandCards.getState().hide(card.num);
+            setTimeout(() => {
+                useHandCards.getState().remove(card.num);
+            }, CARD_HIDING_DURATION);
+
             useTableCards.getState().add({
-                num: card.card,
+                num: card.num,
                 position: {
                     top: Math.floor(Math.random() * 50),
                     left: Math.floor(Math.random() * 50),
@@ -96,7 +103,7 @@ const PTable = () => {
                 return (
                     <PCard
                         key={card.num + "-" + i}
-                        card={card.num}
+                        card={card}
                         sx={{
                             position: "absolute",
                             top: card.position.top + "%",

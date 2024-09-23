@@ -2,16 +2,20 @@ import { useCallback, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 import Box from "@mui/material/Box";
 import { useGrabbedCard } from "../stores/grabbedCard";
+import { CARD_HIDING_DURATION } from "../constants";
+import clsx from "clsx";
+
+const CARD_WIDTH = "min(16vw, 16vh)";
 
 /**
  * PCard
  * @param {Object} props
  * @param {number} props.card
- * @param {boolean} props.draggable
+ * @param {boolean} props.grabbable
  * @param {import("@mui/material").BoxProps["sx"]} props.sx
  * @returns
  */
-const PCard = ({ card, sx, draggable = false }) => {
+const PCard = ({ card, sx, grabbable = false }) => {
     const cardRef = useRef();
     const grabbedCardRef = useRef();
     const mouseMoveHandlerRef = useRef();
@@ -60,9 +64,9 @@ const PCard = ({ card, sx, draggable = false }) => {
 
     const handleMouseDown = useCallback(
         (e) => {
-            if (!draggable) return;
+            if (!grabbable) return;
 
-            grabCard({ card });
+            grabCard({ num: card.num });
 
             setIsDragging(true);
             !isMobile && setTimeout(() => adjustGrabbedCardPos(e));
@@ -80,7 +84,7 @@ const PCard = ({ card, sx, draggable = false }) => {
             );
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [draggable, adjustGrabbedCardPos, card]
+        [grabbable, adjustGrabbedCardPos, card]
     );
 
     return (
@@ -89,28 +93,31 @@ const PCard = ({ card, sx, draggable = false }) => {
                 ref={cardRef}
                 component="img"
                 alt="Playing Card"
-                src={`/cards/${card}.svg`}
+                src={`/cards/${card.num}.svg`}
                 draggable={false}
                 onMouseDown={!isMobile ? handleMouseDown : () => void 0}
                 onTouchStart={isMobile ? handleMouseDown : () => void 0}
                 sx={{
                     position: "relative",
-                    width: "min(16vw, 16vh)",
-                    opacity: isDragging ? 0 : 1,
+                    width: CARD_WIDTH,
+                    opacity: isDragging || card.hidden ? 0 : 1,
                     ...sx,
-                    cursor: draggable
-                        ? isDragging
-                            ? "grabbing"
-                            : "grab"
-                        : "default",
+                    cursor: grabbable ? "grab" : "default",
+                    transition: `margin-right ease ${CARD_HIDING_DURATION}ms`,
+                    "&.hideMePlz": {
+                        mr: `calc(-1 * ${CARD_WIDTH})`,
+                    },
                 }}
+                className={clsx({
+                    hideMePlz: card.hidden,
+                })}
             />
             {isDragging && (
                 <Box
                     ref={grabbedCardRef}
                     component="img"
                     alt="Playing Card"
-                    src={`/cards/${card}.svg`}
+                    src={`/cards/${card.num}.svg`}
                     draggable={false}
                     sx={{
                         position: "fixed",
