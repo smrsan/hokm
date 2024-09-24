@@ -21,7 +21,7 @@ const Hand = () => {
                     display: "flex",
                     width: "512px",
                     maxWidth: "90vw",
-                    justifyContent: "space-between",
+                    justifyContent: "flex-start",
                     alignItems: "center",
                     overflowX: "scroll",
                     gap: "8px",
