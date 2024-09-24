@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export const useHandCards = create((set, get) => ({
-    cards: Array.from({ length: 13 }).map((_, i) => ({ num: i + 1 })),
+    cards: [],
 
     add(cardProps) {
         set((state) => ({ cards: state.cards.concat([cardProps]) }));
