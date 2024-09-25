@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { useHandCards } from "./handCards";
+import { useDeck } from "./deck";
 
 export const useGame = create((set) => ({
     isPaused: true,
@@ -25,3 +27,24 @@ export const useGame = create((set) => ({
         set(() => ({ winnerId: playerId }));
     },
 }));
+
+export async function startGame() {
+    const {
+        start: startGame,
+        winnerId,
+        isStarted: isGameStarted,
+    } = useGame.getState();
+
+    if (isGameStarted || winnerId != null) return;
+    startGame();
+
+    const addToHand = useHandCards.getState().add;
+    const { reset: resetDeck, shuffle: shuffleDeck, draw } = useDeck.getState();
+
+    resetDeck();
+    shuffleDeck();
+
+    for (let i = 0; i < 13; i++) {
+        addToHand({ num: draw() });
+    }
+}
