@@ -1,8 +1,14 @@
 import { Avatar, Box, Stack, Typography } from "@mui/material";
+import WonCards from "./WonCards";
 
 const Profile = ({ male = true, name = "N/A" }) => {
     return (
-        <Stack spacing={0.5}>
+        <Stack
+            spacing={0.5}
+            justifyContent="center"
+            alignItems="center"
+            width="min(25vw, 25vh)"
+        >
             <Avatar
                 sx={{
                     width: "min(15vw, 15vh)",
@@ -15,9 +21,7 @@ const Profile = ({ male = true, name = "N/A" }) => {
                     component="img"
                     alt="User"
                     src={`/images/user-${male ? "male" : "female"}.png`}
-                    sx={{
-                        width: "100%",
-                    }}
+                    sx={{ width: "100%" }}
                 />
             </Avatar>
             <Typography
@@ -30,6 +34,7 @@ const Profile = ({ male = true, name = "N/A" }) => {
             >
                 {name}
             </Typography>
+            <WonCards count={7} />
         </Stack>
     );
 };
