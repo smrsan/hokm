@@ -9,9 +9,15 @@ import { useHandCards } from "../stores/handCards";
 const CARD_WIDTH = "min(16vw, 16vh)";
 
 /**
+ * @typedef {Object} CardType
+ * @property {number} num
+ * @property {boolean} [hidden]
+ */
+
+/**
  * PCard
  * @param {Object} props
- * @param {number} props.card
+ * @param {CardType} props.card
  * @param {boolean} props.grabbable
  * @param {import("@mui/material").BoxProps["sx"]} props.sx
  * @returns
@@ -129,7 +135,11 @@ const PCard = ({ card, sx, grabbable = false }) => {
                 ref={cardRef}
                 component="img"
                 alt="Playing Card"
-                src={`/cards/${card.num}.svg`}
+                src={
+                    card.num < 0
+                        ? "/images/card-backside.jpg"
+                        : `/cards/${card.num}.svg`
+                }
                 draggable={false}
                 onMouseDown={!isMobile ? handleMouseDown : () => void 0}
                 onTouchStart={isMobile ? handleMouseDown : () => void 0}
@@ -137,8 +147,10 @@ const PCard = ({ card, sx, grabbable = false }) => {
                     position: "relative",
                     width: CARD_WIDTH,
                     opacity: isDragging || card.hidden ? 0 : 1,
-                    ...sx,
                     cursor: grabbable ? "grab" : "default",
+                    aspectRatio: "80.250 / 116.550",
+                    borderRadius: "4px",
+                    ...sx,
                     "&.hideMePlz": {
                         pointerEvents: "none",
                         transitionTimingFunction: "ease",
