@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Box } from "@mui/material";
+import { isMobile } from "react-device-detect";
+import clsx from "clsx";
+import Box from "@mui/material/Box";
+
 import PCard from "./PCard";
 import { useGrabbedCard } from "../stores/grabbedCard";
-import { isMobile } from "react-device-detect";
 import { useTableCards } from "../stores/tableCards";
 import { useHandCards } from "../stores/handCards";
 import { CARD_HIDING_DURATION } from "../constants";
@@ -97,7 +99,35 @@ const PTable = () => {
                     ? (theme) => `1px solid ${theme.palette.primary.main}`
                     : "none",
                 borderRadius: "8px",
+
+                transitionProperty: "transform opacity",
+                transitionTimingFunction: "ease",
+                transitionDuration: "300ms",
+                transitionDelay: "1s",
+                opacity: 1,
+                "&.topWon": {
+                    transform: "translateY(-50px)",
+                    opacity: 0,
+                },
+                "&.leftWon": {
+                    transform: "translateX(-50px)",
+                    opacity: 0,
+                },
+                "&.rightWon": {
+                    transform: "translateX(50px)",
+                    opacity: 0,
+                },
+                "&.bottomWon": {
+                    transform: "translateY(50px)",
+                    opacity: 0,
+                },
             }}
+            className={clsx({
+                topWon: false,
+                leftWon: false,
+                rightWon: false,
+                bottomWon: false,
+            })}
         >
             {tableCards.map((card, i) => {
                 return (
