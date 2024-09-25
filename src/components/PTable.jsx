@@ -7,7 +7,7 @@ import PCard from "./PCard";
 import { useGrabbedCard } from "../stores/grabbedCard";
 import { useTableCards } from "../stores/tableCards";
 import { useHandCards } from "../stores/handCards";
-import { CARD_HIDING_DURATION } from "../constants";
+import { CARD_HIDING_DURATION, CARD_WINNING_DURATION } from "../constants";
 
 const PTable = () => {
     const boxRef = useRef();
@@ -102,7 +102,7 @@ const PTable = () => {
 
                 transitionProperty: "transform opacity",
                 transitionTimingFunction: "ease",
-                transitionDuration: "300ms",
+                transitionDuration: `${CARD_WINNING_DURATION}ms`,
                 transitionDelay: "1s",
                 opacity: 1,
                 "&.topWon": {

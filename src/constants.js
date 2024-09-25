@@ -1,1 +1,2 @@
 export const CARD_HIDING_DURATION = 750;
+export const CARD_WINNING_DURATION = 300;
