@@ -1,6 +1,16 @@
+import { useEffect } from "react";
+import { App } from "@capacitor/app";
+import { useNavigate } from "react-router-dom";
 import { alpha, Box, Button, Paper } from "@mui/material";
 
 const MenuPage = () => {
+    const nav = useNavigate();
+
+    useEffect(() => {
+        App.addListener("backButton", App.exitApp);
+        return () => App.removeAllListeners();
+    }, []);
+
     return (
         <Box
             sx={{
@@ -33,10 +43,9 @@ const MenuPage = () => {
                         mb: 5,
                     }}
                 />
-                <PlayButton>Play</PlayButton>
+                <PlayButton onClick={() => nav("/game")}>Play</PlayButton>
                 <PlayButton color="error">MultiPlayer</PlayButton>
                 <MiscButton>Settings</MiscButton>
-                <MiscButton>Quit</MiscButton>
             </Paper>
         </Box>
     );
