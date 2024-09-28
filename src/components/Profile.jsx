@@ -1,7 +1,7 @@
 import { Avatar, Box, Stack, Typography } from "@mui/material";
 import WonCards from "./WonCards";
 
-const Profile = ({ male = true, name = "N/A" }) => {
+const Profile = ({ playerNum, male = true, name = "N/A" }) => {
     return (
         <Stack
             spacing={0.5}
@@ -34,7 +34,7 @@ const Profile = ({ male = true, name = "N/A" }) => {
             >
                 {name}
             </Typography>
-            <WonCards count={7} />
+            <WonCards {...{ count: 7, playerNum }} />
         </Stack>
     );
 };

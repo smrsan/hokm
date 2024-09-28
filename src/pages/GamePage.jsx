@@ -1,10 +1,19 @@
+import { useEffect } from "react";
+
 import Stack from "@mui/material/Stack";
 
 import Hand from "../components/Hand";
 import PTable from "../components/PTable";
 import Profile from "../components/Profile";
+import gameManager from "../gameManager";
+import { useHandCards } from "../stores/handCards";
 
 function GamePage() {
+    useEffect(() => {
+        // if (useHandCards.getState().cards.length) return;
+        gameManager.restart();
+    }, []);
+
     return (
         <Stack width="100vw" height="100vh">
             <Stack
@@ -14,7 +23,7 @@ function GamePage() {
                 pt="5px"
                 direction="row"
             >
-                <Profile male name={"Reza"} />
+                <Profile playerNum={1} male name={"Reza"} />
             </Stack>
             <Stack
                 height="calc(100vh / 3)"
@@ -23,9 +32,9 @@ function GamePage() {
                 px={1}
                 direction="row"
             >
-                <Profile male name={"Ali"} />
+                <Profile playerNum={2} male name={"Ali"} />
                 <PTable />
-                <Profile male={false} name={"Melika"} />
+                <Profile playerNum={3} male={false} name={"Melika"} />
             </Stack>
             <Stack
                 width="100vw"

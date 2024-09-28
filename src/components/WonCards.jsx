@@ -1,8 +1,16 @@
+import { useMemo } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import PCard from "./PCard";
+import { useWonCards } from "../stores/wonCards";
 
-const WonCards = ({ count = 0 }) => {
+const WonCards = ({ playerNum }) => {
+    const totalWonCards = useWonCards((state) => state.wonCards);
+    const wonCardsCount = useMemo(
+        () => totalWonCards?.[playerNum] ?? 0,
+        [playerNum, totalWonCards]
+    );
+
     return (
         <Box
             sx={{
@@ -15,7 +23,7 @@ const WonCards = ({ count = 0 }) => {
                 textAlign: "center",
             }}
         >
-            {Array.from({ length: count }).map((_, i) => {
+            {Array.from({ length: wonCardsCount }).map((_, i) => {
                 const width = "min(5vw, 5vh)";
 
                 return (
@@ -31,15 +39,15 @@ const WonCards = ({ count = 0 }) => {
                     />
                 );
             })}
-            {!!count && (
+            {!!wonCardsCount && (
                 <Typography
                     sx={{
                         position: "relative",
-                        left: `-${count * 12.75}%`,
+                        left: `-${wonCardsCount * 12.75}%`,
                         color: (theme) => theme.palette.common.white,
                     }}
                 >
-                    {count}
+                    {wonCardsCount}
                 </Typography>
             )}
         </Box>

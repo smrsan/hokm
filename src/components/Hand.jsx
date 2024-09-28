@@ -17,7 +17,7 @@ const Hand = () => {
                     mb: 1,
                 }}
             >
-                <WonCards count={7} />
+                <WonCards playerNum={0} />
             </Box>
             <Box
                 sx={{
